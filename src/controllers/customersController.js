@@ -26,7 +26,6 @@ async function getCustomerById(req, res) {
     console.log('passou by Id')
 
     try {
-
         const customer = await connection.query(`SELECT * FROM customers WHERE id = $1`, [id])
 
         if (!customer.rows[0]) {
@@ -55,6 +54,11 @@ async function createCustomer(req, res) {
         // birthday deve ser uma data válida
         // cpf tem q ser !== de um já cadastrado
 
+        const customer = await connection.query(`SELECT * FROM customer WHERE cpf = $1`, [cpf])
+
+        if (customer.rows[0]) {
+            return res.status(409).send('Esse cpf já está cadastrado')
+        }
 
 
         // await connection.query(`INSERT INTO customers (name, phone, cpf, birthday) VALUES ($1, $2, $3, $4)`, [name, phone, cpf, birthday])
@@ -73,8 +77,9 @@ async function updateCustomer(req, res) {
 
     try {
         // validate cpf !==
-        const customer = await connection.query(`SELECT * FROM customers WHERE cpf = $1`,[cpf]) 
-        if(customer.rows[0]){
+        const customer = await connection.query(`SELECT * FROM customers WHERE cpf = $1`, [cpf])
+
+        if (customer.rows[0] && name.toLowerCase() !== customer.rows[0].name.toLowerCase()) {
             return res.status(409).send('Esse cpf já está sendo utilizado')
         }
 
@@ -83,8 +88,7 @@ async function updateCustomer(req, res) {
            phone = $2,
            cpf = $3,
            birthday = $4
-           WHERE id = $5`,[name, phone, cpf, birthday, id] )
-
+           WHERE id = $5`, [name, phone, cpf, birthday, id])
         res.send(customer.rows[0])
 
     } catch (error) {

@@ -16,23 +16,25 @@ async function listCategories(req, res) {
 async function createCategorie(req, res) {
     const { name } = req.body
 
+    const newName = name.toLowerCase();
     //validate
-    if (!name) {
+    if (!newName) {
         return res.sendStatus(400)
     }
 
     try {
         // fazer validação de categoria já existente retornnado 409
-        const categories = (await connection.query('SELECT name FROM categories')).rows
+        const categorie = await connection.query('SELECT * FROM categories WHERE name = $1', [newName])
 
-        for (let i = 0; i < categories.length; i++) {
-            if(name === categories[i].name){
-                return res.status(409).send('essa categoria já existe')
-            }
+        if (categorie.rows[0]) {
+            return res.status(409).send('Essa categoria já existe')
         }
 
-        // await connection.query('INSERT INTO categories (name) VALUES ($1)', [name])
-        res.status(201).send(categories)
+        console.log(newName)
+        console.log(categorie.rows)
+
+        await connection.query('INSERT INTO categories (name) VALUES ($1)', [newName])
+        res.status(201).send(categorie.rows[0])
 
     } catch (error) {
         console.error(error);
