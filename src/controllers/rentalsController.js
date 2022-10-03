@@ -75,7 +75,6 @@ async function finalizeRent(req, res) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const daysLate = (today - rent.rows[0].rentDate) / (1000 * 60 * 60 * 24);
-        const returnDate = dayjs().format('YYYY-MM-DD');
 
         let delayFee = 0;
         if (daysLate > rent.rows[0].daysRented) {
@@ -83,7 +82,6 @@ async function finalizeRent(req, res) {
         }
 
         await connection.query('UPDATE rentals SET "returnDate" = $1, "delayFee" = $2 WHERE id = $3;', [today, delayFee, rent.rows[0].id]);
-
 
         res.sendStatus(200);
     } catch (error) {

@@ -1,5 +1,4 @@
 import { connection } from "../database/db.js";
-import joi from 'joi';
 import customerSchema from '../schemas/customersSchemas.js'
 
 
@@ -23,7 +22,7 @@ async function customerMiddleware(req, res, next) {
 }
 
 async function updateCustomerMiddleware(req, res, next) {
-    const { cpf } = req.body;
+    const { cpf, name } = req.body;
 
     const validation = customerSchema.validate(req.body, { abortEarly: false });
 

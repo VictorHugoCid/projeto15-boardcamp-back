@@ -1,6 +1,4 @@
-import express from 'express';
 import { connection } from '../database/db.js';
-import dayjs from 'dayjs'
 
 async function listCustomers(req, res) {
     const { cpf } = req.query;
@@ -23,7 +21,6 @@ async function listCustomers(req, res) {
 
 async function getCustomerById(req, res) {
     const { id } = req.params;
-    console.log('passou by Id')
 
     try {
         const customer = await connection.query(`SELECT * FROM customers WHERE id = $1`, [id])
@@ -31,7 +28,6 @@ async function getCustomerById(req, res) {
         if (!customer.rows[0]) {
             return res.sendStatus(404)
         }
-
         res.status(200).send(customer.rows[0])
 
     } catch (error) {
@@ -45,10 +41,9 @@ async function createCustomer(req, res) {
     // ver como q chega a data
 
     try {
-
         await connection.query(`INSERT INTO customers (name, phone, cpf, birthday) VALUES ($1, $2, $3, $4)`, [name, phone, cpf, birthday])
 
-        res.status(201).send(req.body)
+        res.sendStatus(201)
 
     } catch (error) {
         console.error(error);

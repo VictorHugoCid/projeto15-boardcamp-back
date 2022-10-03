@@ -41,14 +41,6 @@ async function insertGame(req, res) {
     const newName = name.toLowerCase();
 
     try {
-        // validate lembrar do maldito Joi
-        const games = await connection.query(`SELECT * FROM games WHERE name = $1`, [newName])
-        console.log(games.rows[0])
-
-        if (games.rows[0]) {
-            return res.status(409).send('Esse jogo já foi adicionado')
-        }
-
         await connection.query('INSERT INTO games (name, image, "stockTotal", "categoryId", "pricePerDay") VALUES ($1, $2, $3, $4, $5);', [newName, image, stockTotal, categoryId, pricePerDay])
 
         res.sendStatus(201)
