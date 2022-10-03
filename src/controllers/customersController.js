@@ -1,4 +1,4 @@
-import express, { request } from 'express';
+import express from 'express';
 import { connection } from '../database/db.js';
 import dayjs from 'dayjs'
 
@@ -43,25 +43,10 @@ async function getCustomerById(req, res) {
 async function createCustomer(req, res) {
     const { name, phone, cpf, birthday } = req.body;
     // ver como q chega a data
-    let data = dayjs('1900-01-15').format('DD/MM/YYYY')
-    console.log(data)
-    // 
 
     try {
-        // validate cpd min 11 caract
-        // phone string com min de 10 ou 11 caract numéricos
-        // name !== vazio
-        // birthday deve ser uma data válida
-        // cpf tem q ser !== de um já cadastrado
 
-        const customer = await connection.query(`SELECT * FROM customer WHERE cpf = $1`, [cpf])
-
-        if (customer.rows[0]) {
-            return res.status(409).send('Esse cpf já está cadastrado')
-        }
-
-
-        // await connection.query(`INSERT INTO customers (name, phone, cpf, birthday) VALUES ($1, $2, $3, $4)`, [name, phone, cpf, birthday])
+        await connection.query(`INSERT INTO customers (name, phone, cpf, birthday) VALUES ($1, $2, $3, $4)`, [name, phone, cpf, birthday])
 
         res.status(201).send(req.body)
 

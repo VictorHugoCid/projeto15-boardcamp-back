@@ -59,11 +59,33 @@ async function insertRent(req, res) {
 }
 
 async function finalizeRent(req, res) {
+    const { id } = req.params;
 
     try {
+        const rent = await connection.query(`SELECT * FROM rentals WHERE id=$1`, [id])
+
+        if (rent.rowCount === 0) {
+            return res.sendStatus(404);
+        }
+
+        if (rent.rows[0].returnDate !== null) {
+            return res.sendStatus(400);
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const daysLate = (today - rent.rows[0].rentDate) / (1000 * 60 * 60 * 24);
+        const returnDate = dayjs().format('YYYY-MM-DD');
+
+        let delayFee = 0;
+        if (daysLate > rent.rows[0].daysRented) {
+            delayFee = rent.rows[0].pricePerDay * daysLate
+        }
+
+        await connection.query('UPDATE rentals SET "returnDate" = $1, "delayFee" = $2 WHERE id = $3;', [today, delayFee, rent.rows[0].id]);
+
 
         res.sendStatus(200);
-
     } catch (error) {
         console.error(error);
         res.sendStatus(500);
@@ -76,13 +98,13 @@ async function deleteRent(req, res) {
     try {
         // validar se o id existe
         const rent = await connection.query('SELECT * FROM rentals WHERE id = $1', [id]);
-        if(!rent.rows[0]){
+        if (!rent.rows[0]) {
             return res.sendStatus(404);
         }
         // validar se o aluguel já está finalizado
         const finalizedRent = await connection.query('SELECT * FROM rentals WHERE id = $1', [id]);
 
-        if(!finalizedRent.rows[0].returnDate){
+        if (!finalizedRent.rows[0].returnDate) {
             return res.sendStatus(400);
         }
 
@@ -96,8 +118,6 @@ async function deleteRent(req, res) {
         res.sendStatus(500);
     }
 }
-
-
 
 export {
     listRentals,
